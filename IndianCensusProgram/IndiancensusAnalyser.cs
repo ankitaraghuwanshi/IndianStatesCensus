@@ -8,10 +8,10 @@ namespace IndianCensus
 {
     public class CensusAnalyser
     {
-        public Dictionary<string, StateCensusData> data;
-        public Dictionary<string, StateCensusData> LoadCensusData(string csvFilePath, string dataHeaders)
+        public Dictionary<string, IndianStateCensusData> data;
+        public Dictionary<string, IndianStateCensusData> LoadCensusData(string csvFilePath, string dataHeaders)
         {
-            data = new Dictionary<string, StateCensusData>();
+            data = new Dictionary<string, IndianStateCensusData>();
 
             if (!File.Exists(csvFilePath))
             {
@@ -19,13 +19,13 @@ namespace IndianCensus
             }
             if (Path.GetExtension(csvFilePath) != ".csv")
             {
-                throw new CensusAnalyserException(CensusAnalyserException.ExceptionType.Improper_Extension, "Improper extension");
+                throw new CensusAnalyserException(CensusAnalyserException.ExceptionType.Improper_Extension, "Improper file extension");
             }
 
             string[] censusData = File.ReadAllLines(csvFilePath);
             if (censusData[0] != dataHeaders)
             {
-                throw new CensusAnalyserException(CensusAnalyserException.ExceptionType.Incorrect_Header, "Incorrect Header");
+                throw new CensusAnalyserException(CensusAnalyserException.ExceptionType.Incorrect_Header, "Header is not correct");
             }
 
             foreach (string row in censusData.Skip(1))
@@ -35,9 +35,12 @@ namespace IndianCensus
                     throw new CensusAnalyserException(CensusAnalyserException.ExceptionType.Deliminator_Not_Found, "Delimiter is not found");
                 }
                 string[] column = row.Split(',');
-                data.Add(column[0], new StateCensusData(column[0], column[1], column[2], column[3]));
+                if (csvFilePath.Contains("IndiaStateCode"))
+                    data.Add(column[0], new IndianStateCensusData(new IndianStateCodeData(column[0], column[1], column[2], column[3])));
+                else
+                    data.Add(column[0], new IndianStateCensusData(column[0], column[1], column[2], column[3]));
             }
-            return data;
+            return data; ;
         }
     }
 }
